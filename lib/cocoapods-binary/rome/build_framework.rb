@@ -54,6 +54,7 @@ def build_for_iosish_platform(sandbox,
 
   device_binary = device_framework_path + "/#{module_name}"
   simulator_binary = simulator_framework_path + "/#{module_name}"
+  Pod::UI.puts File.file?(device_binary) && File.file?(simulator_binary)
   return unless File.file?(device_binary) && File.file?(simulator_binary)
   
   # the device_lib path is the final output file path
