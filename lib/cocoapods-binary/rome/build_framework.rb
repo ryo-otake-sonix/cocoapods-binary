@@ -32,19 +32,10 @@ def build_for_iosish_platform(sandbox,
   # make less arch to iphone simulator for faster build
   custom_build_options_simulator += ['ARCHS=x86_64', 'ONLY_ACTIVE_ARCH=NO'] if simulator == 'iphonesimulator'
 
-  is_succeed, _ = xcodebuild(sandbox, target_label, device, deployment_target, other_options + custom_build_options)
+  is_succeed, _ = xcodebuild(sandbox, target, device, deployment_target, other_options + custom_build_options)
   exit 1 unless is_succeed
-  is_succeed, _ = xcodebuild(sandbox, target_label, simulator, deployment_target, other_options + custom_build_options_simulator)
+  is_succeed, _ = xcodebuild(sandbox, target simulator, deployment_target, other_options + custom_build_options_simulator)
   exit 1 unless is_succeed
-
-  config_sdk_path = build_dir(sandbox.sources_root)+ "#{CONFIGURATION}-#{sdk}"
-  if is_succeed
-    target_path = config_sdk_path + target
-    Dir.mkdir(target_path)
-    # FileUtils.mv(Dir.glob("#{config_sdk_path}/*.bcsymbolmap"), target_path)
-    FileUtils.mv(Dir.glob("#{config_sdk_path}/#{target}.framework"), target_path)
-    FileUtils.mv(Dir.glob("#{config_sdk_path}/#{target}.framework.dSYM"), target_path)
-  end
 
   # paths
   target_name = target.name # equals target.label, like "AFNeworking-iOS" when AFNetworking is used in multiple platforms.
@@ -116,13 +107,23 @@ def build_for_iosish_platform(sandbox,
 end
 
 def xcodebuild(sandbox, target, sdk='macosx', deployment_target=nil, other_options=[])
-  args = %W(-project #{sandbox.project_path.realdirpath} -scheme #{target} -configuration #{CONFIGURATION} -sdk #{sdk} )
+  args = %W(-project #{sandbox.project_path.realdirpath} -scheme #{target.label} -configuration #{CONFIGURATION} -sdk #{sdk} )
   platform = PLATFORMS[sdk]
   args += Fourflusher::SimControl.new.destination(:oldest, platform, deployment_target) unless platform.nil?
   args += other_options
   log = `xcodebuild #{args.join(" ")} 2>&1`
   exit_code = $?.exitstatus  # Process::Status
   is_succeed = (exit_code == 0)
+
+  # xcodebuild後のframeworkの有無判定の時にこけないようにする処理
+  config_sdk_path = build_dir(sandbox.sources_root) + "#{CONFIGURATION}-#{sdk}"
+  if is_succeed
+    target_path = config_sdk_path + target.name
+    Dir.mkdir(target_path)
+    # FileUtils.mv(Dir.glob("#{config_sdk_path}/*.bcsymbolmap"), target_path)
+    FileUtils.mv(Dir.glob("#{config_sdk_path}/#{target.product_module_name}.framework"), target_path)
+    FileUtils.mv(Dir.glob("#{config_sdk_path}/#{target.product_module_name}.framework.dSYM"), target_path)
+  end
 
   if !is_succeed
     begin
