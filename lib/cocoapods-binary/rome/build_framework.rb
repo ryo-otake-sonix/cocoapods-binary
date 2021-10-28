@@ -34,7 +34,7 @@ def build_for_iosish_platform(sandbox,
 
   is_succeed, _ = xcodebuild(sandbox, target, device, deployment_target, other_options + custom_build_options)
   exit 1 unless is_succeed
-  is_succeed, _ = xcodebuild(sandbox, target simulator, deployment_target, other_options + custom_build_options_simulator)
+  is_succeed, _ = xcodebuild(sandbox, target, simulator, deployment_target, other_options + custom_build_options_simulator)
   exit 1 unless is_succeed
 
   # paths
@@ -45,7 +45,6 @@ def build_for_iosish_platform(sandbox,
 
   device_binary = device_framework_path + "/#{module_name}"
   simulator_binary = simulator_framework_path + "/#{module_name}"
-  Pod::UI.puts File.file?(device_binary) && File.file?(simulator_binary)
   return unless File.file?(device_binary) && File.file?(simulator_binary)
   
   # the device_lib path is the final output file path
