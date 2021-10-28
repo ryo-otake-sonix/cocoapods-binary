@@ -37,6 +37,15 @@ def build_for_iosish_platform(sandbox,
   is_succeed, _ = xcodebuild(sandbox, target_label, simulator, deployment_target, other_options + custom_build_options_simulator)
   exit 1 unless is_succeed
 
+  config_sdk_path = build_dir(sandbox.sources_root)+ "#{CONFIGURATION}-#{sdk}"
+  if is_succeed
+    target_path = config_sdk_path + target
+    Dir.mkdir(target_path)
+    # FileUtils.mv(Dir.glob("#{config_sdk_path}/*.bcsymbolmap"), target_path)
+    FileUtils.mv(Dir.glob("#{config_sdk_path}/#{target}.framework"), target_path)
+    FileUtils.mv(Dir.glob("#{config_sdk_path}/#{target}.framework.dSYM"), target_path)
+  end
+
   # paths
   target_name = target.name # equals target.label, like "AFNeworking-iOS" when AFNetworking is used in multiple platforms.
   module_name = target.product_module_name
