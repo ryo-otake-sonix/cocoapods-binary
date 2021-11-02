@@ -118,9 +118,7 @@ def xcodebuild(sandbox, target, sdk='macosx', deployment_target=nil, other_optio
   config_sdk_path = build_dir(sandbox.sources_root) + "#{CONFIGURATION}-#{sdk}"
   if is_succeed
     target_path = config_sdk_path + target.name
-    target_path_framework = target_path + "#{target.product_module_name}.framework"
-    target_path_framework_dSYM = target_path + "#{target.product_module_name}.framework"
-    if !(File.file?(target_path_framework) || File.file?(target_path_framework_dSYM))
+    if !(File.exist?(target_path))
       Dir.mkdir(target_path)
       # FileUtils.mv(Dir.glob("#{config_sdk_path}/*.bcsymbolmap"), target_path)
       FileUtils.mv(Dir.glob("#{config_sdk_path}/#{target.product_module_name}.framework"), target_path)
