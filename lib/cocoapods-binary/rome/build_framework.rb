@@ -118,11 +118,12 @@ def xcodebuild(sandbox, target, sdk='macosx', deployment_target=nil, other_optio
   config_sdk_path = build_dir(sandbox.sources_root) + "#{CONFIGURATION}-#{sdk}"
   if is_succeed
     target_path = config_sdk_path + target.name
+    # cocoapods 1.8.4以下はtarget_pathが存在するので、存在した場合は以下の処理をスキップ
     if !(File.exist?(target_path))
       Dir.mkdir(target_path)
       # FileUtils.mv(Dir.glob("#{config_sdk_path}/*.bcsymbolmap"), target_path)
-      FileUtils.mv(Dir.glob("#{config_sdk_path}/#{target.product_module_name}.framework"), target_path)
-      FileUtils.mv(Dir.glob("#{config_sdk_path}/#{target.product_module_name}.framework.dSYM"), target_path)
+      FileUtils.mv("#{config_sdk_path}/#{target.product_module_name}.framework", target_path)
+      FileUtils.mv("#{config_sdk_path}/#{target.product_module_name}.framework.dSYM", target_path)
     end
   end
 
